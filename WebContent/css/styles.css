@@ -1,0 +1,21 @@
+@charset "ISO-8859-1";
+
+header{
+	background-color: lightgrey;
+}
+
+.view {
+	display: flex;
+	margin: 0 auto;
+}
+
+.pages {
+  margin: 0 auto;
+}
+
+.footer{
+  display: flex;
+  margin: 0 auto;
+  background-color: lightgrey;
+  text-align: center;
+}
