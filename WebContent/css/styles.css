@@ -1,20 +1,41 @@
 @charset "ISO-8859-1";
 
 header{
+	text-align: center;
 	background-color: lightgrey;
+	height: 10%;
+}
+
+html, body {
+	height:100vh;
+	margin: 0;
+	min-height: 100vh;
+	overflow: auto;
 }
 
 .view {
+	height: 70%;
 	display: flex;
 	margin: 0 auto;
+	text-align: center;
+}
+
+th{
+	padding-right: 30px;
 }
 
 .pages {
+	display: inline-block;
   margin: 0 auto;
 }
 
-.footer{
+.content {
+	display: flex;
+}
+
+footer{
   display: flex;
+  height: 10%;
   margin: 0 auto;
   background-color: lightgrey;
   text-align: center;

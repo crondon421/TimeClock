@@ -1,9 +1,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="java.util.ArrayList" %>
 
-<body>
+<body> 
 <div class="content">
-  admin portal
+  <c:out value="${LastPunch}"/>
 </div>
 
 </body>

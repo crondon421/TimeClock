@@ -3,7 +3,7 @@
 
 <body>
 <div class="content">
-  admin portal
+  employee portal
 </div>
 
 </body>

@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en">
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <head>
 <!-- Required meta tags -->
 <meta charset="utf-8">
 <meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	content="width=device-width, initial-scale=1, shrink-to-fit=yes">
 
 <!-- Bootstrap CSS 
 <link rel="stylesheet"
@@ -16,23 +16,21 @@
 	-->
 
 <title>Time clock project</title>
-<%@ include file="header.html"%>
 <link rel="stylesheet" type="text/css" href="css/styles.css" />
-
 </head>
 <body>
-	
+	<%@ include file="header.jsp"%>
 	<div class="view">
-		<div class="pages">
-		  <c:set var="headURL" scope="application" value="login.jsp"/>
-		  <jsp:include page="${headURL}"></jsp:include>
-		</div>	
+	 <div class="pages">
+			<c:set var="headURL" scope="application" value="login.jsp" />
+			<jsp:include page="${headURL}"></jsp:include>
+			</div>
 	</div>
-	
-	
+
 <footer>
-	<%@ include file="footer.jsp"%>
+  <%@ include file="footer.jsp"%>
 </footer>
+
 	<!--Bootstrap details
 	
 	

@@ -6,6 +6,10 @@ public class Employee {
 	private String firstName;
 	private String lastName;
 	private String employeeType;
+	private boolean isWorking;
+	
+	
+	
 	
 	public int getEmployeeId() {
 		return employeeId;
@@ -31,6 +35,13 @@ public class Employee {
 	public void setEmployeeType(String employeeType) {
 		this.employeeType = employeeType;
 	}
+	public boolean isWorking() {
+		return isWorking;
+	}
+	public void setWorking(boolean isWorking) {
+		this.isWorking = isWorking;
+	}
+	
 	
 	
 	

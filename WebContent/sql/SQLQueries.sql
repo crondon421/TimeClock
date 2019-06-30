@@ -7,8 +7,8 @@
 SELECT i.EmployeeId as "Employee ID",
   e.FirstName as "First Name",
     e.LastName as "Last Name",
-    i.PunchTime as "Punch In",
-    o.PunchTime as "Punch Out",
+    i.PunchTime as "PunchIn",
+    o.PunchTime as "PunchOut",
     TIMEDIFF(o.punchTime ,i.punchTime) as "hours worked"
 FROM clock as i 
   INNER JOIN clock as o ON i.EmployeeID=o.EmployeeID 
