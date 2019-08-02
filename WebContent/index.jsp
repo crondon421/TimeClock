@@ -24,7 +24,7 @@
 	 <div class="pages">
 			<c:set var="headURL" scope="application" value="login.jsp" />
 			<jsp:include page="${headURL}"></jsp:include>
-			</div>
+		</div>
 	</div>
 
 <footer>

@@ -1,3 +1,13 @@
+/*
+ *  File: LoginServlet.java
+ * Date: 8/2/2019
+ * Author: Christian Rondon
+ * Description: This Java Servlet is used to authenticate the login information entered by the user to access their clock information.
+ * 
+ */
+
+
+
 package servlets;
 
 import java.io.IOException;
@@ -18,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.Employee;
+import models.DBCredentials;
 
 
 
@@ -25,46 +36,42 @@ import models.Employee;
 public class LoginServlet extends HttpServlet {
 
 	@Override
+	/*
+	 * doPost() method is used to compare the entered login information with each each employees login information to find a username and password match.
+	 * After finding a match, the method determines whether the user has admin/HR privileges or regular employee privileges.
+	 * */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+		//Instantiation of local variables.
 		ArrayList<Employee> employeeList = new ArrayList<Employee>();
-
-		//set content type of response
-		resp.setContentType("text/html");
-		//Step 2: get the printwriter
-		PrintWriter out = resp.getWriter();
-		
-		System.out.println("This is working");
-
-		//get globals
-
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet myRs = null;
-		
 		HttpSession session = req.getSession();
+		RequestDispatcher requestDispatcher = null;
 
+		//try method is the beginning of the connection and retrieval of the employee list from the database.
 		try {
-
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", "root", "halloffame421");
-
+			
+			//connect to database and execute the query for a full list of employees
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 			stmt = conn.createStatement();
+			myRs = stmt.executeQuery("select * from employee");
 
-			myRs = stmt.executeQuery("select * from employees");
-
+			/* Boilerplate code used to handle the list of employees retrieved from the database.
+			 * These blocks will be similar to many across the application, and can be prevented by the use
+			 * of an Object Relational Mapping tool such as Hibernate.
+			 */
 			while (myRs.next()) {
-				System.out.println("Still working 1");
-				//TODO: Create the bean
 				Employee newEmployee = new Employee();
 				newEmployee.setEmployeeId(myRs.getInt("EmployeeID"));
 				newEmployee.setFirstName(myRs.getString("FirstName"));
 				newEmployee.setLastName(myRs.getString("LastName"));
 				newEmployee.setEmployeeType(myRs.getString("EmployeeType"));
-				//TODO: add to set of beans
 				employeeList.add(newEmployee);
 			}
 			
-			RequestDispatcher requestDispatcher = null;
+			//iterate through the employeelist to attempt to find a match in username/password
 			for(Employee emp : employeeList) {
 				System.out.println(emp.getLastName());
 				System.out.println(req.getParameter("password"));
@@ -72,7 +79,6 @@ public class LoginServlet extends HttpServlet {
 					if(emp.getLastName().equals(req.getParameter("password"))) {
 						System.out.println("Still working 2");
 						String empType = emp.getEmployeeType();
-						out.println(empType);
 						if (empType.equals("hr") || empType.equals("admin")) {
 							System.out.println("SUCCESS");
 							session.setAttribute("user", emp);

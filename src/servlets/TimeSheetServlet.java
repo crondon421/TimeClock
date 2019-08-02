@@ -5,11 +5,10 @@ import java.io.PrintWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -20,17 +19,18 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import models.Employee;
-import models.TimePunch;
+import models.TimeShift;
+import models.DBCredentials;
 
 
 @WebServlet("/TimeSheet")
 public class TimeSheetServlet extends HttpServlet{
-	
-	
+
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		ArrayList<TimePunch> punches = new ArrayList<TimePunch>();
+		ArrayList<TimeShift> recordedShifts = new ArrayList<TimeShift>();
 		//Step 1: set the content type
 		resp.setContentType("text/html");
 
@@ -40,7 +40,7 @@ public class TimeSheetServlet extends HttpServlet{
 		//Step 3: Generate HTML content
 
 
-		//
+		//establish connection to database
 		Connection myConn = null; 
 		CallableStatement myStmt = null; 
 		ResultSet myRs = null;
@@ -48,43 +48,49 @@ public class TimeSheetServlet extends HttpServlet{
 
 		HttpSession session = req.getSession();
 
+		Employee user = (Employee) session.getAttribute("user");
+
+		if(user == null) {
+			session.setAttribute("headURL","login.jsp");
+			RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
+			requestDispatcher.forward(req, resp);
+		}
 
 		try {
 
-			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", "root", "halloffame421");
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 
 			myStmt = myConn.prepareCall("{call list_timesheet_for_employee(?)}");
-			
-			Employee user = (Employee) session.getAttribute("user");
-			
+
+
+
 			myStmt.setInt(1, user.getEmployeeId());
-			
+
 			myRs = myStmt.executeQuery();
-			
+
 			while (myRs.next()) {
-				
-				TimePunch punch = new TimePunch();
 				//TODO: Create the bean
-				punch.setEmployeeId(myRs.getInt("employee_id"));
-				punch.setFirstName(myRs.getString("first_name"));
-				punch.setLastName(myRs.getString("last_name"));
-				punch.setClockIn(myRs.getString("punch_in"));
-				punch.setClockOut(myRs.getString("punch_out"));
-				punch.setHoursWorked(myRs.getDouble("hours_worked"));
-				
+				TimeShift timeShift = new TimeShift();
+				timeShift.setEmployeeId(myRs.getInt("employee_id"));
+				timeShift.setClockIn(myRs.getString("punch_in"));
+				timeShift.setClockOut(myRs.getString("punch_out"));
+				timeShift.setHoursWorked(myRs.getDouble("hours_worked"));
+
 				//TODO: add to set of beans
-				punches.add(punch);
+				recordedShifts.add(timeShift);
 			}
 
+
+
 			//TODO: send the set of beans to the jtsl on the jsp page
-			req.setAttribute("punches", punches);
+			req.setAttribute("punches", recordedShifts);
 			session.setAttribute("headURL","time_sheet.jsp");
 			RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
 			requestDispatcher.forward(req, resp);
 			//TODO: close the result set
 		}catch (Exception e) {
 			System.out.println("EXCEPTION");
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		finally {
 			try {
@@ -98,4 +104,28 @@ public class TimeSheetServlet extends HttpServlet{
 		}
 
 	}
+
+	@Override
+
+	//TODO: SET THIS UP TO ADD a webpage
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+		//establish connection to database
+		Connection myConn = null;
+		PreparedStatement myStmt = null;
+		ResultSet myRs = null;
+
+		HttpSession session = req.getSession();
+
+		try {
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", "root", "halloffame421");
+			myStmt = myConn.prepareCall("select max(TimePunch) as LastPunch from clock where EmployeeID=?");
+
+		}catch (Exception e) {
+			System.out.println("EXCEPTION");
+			System.out.println(e);
+		}
+
+	}
+
 }

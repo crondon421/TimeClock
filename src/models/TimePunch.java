@@ -1,65 +1,38 @@
 package models;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class TimePunch {
 
 	
-	
-	int employeeId;
-	String firstName;
-	String lastName;
-	DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-	String clockIn;
-	String clockOut;
-	Double hoursWorked;
+	private int punchId;
+	private int employeeId;
+	private String neutralPunch;
+	private boolean punchType;
 	
 	
+	
+	public int getPunchId() {
+		return punchId;
+	}
+	public void setPunchId(int punchId) {
+		this.punchId = punchId;
+	}
 	public int getEmployeeId() {
 		return employeeId;
 	}
 	public void setEmployeeId(int employeeId) {
 		this.employeeId = employeeId;
 	}
-	public String getFirstName() {
-		return firstName;
+	public String getNeutralPunch() {
+		return neutralPunch;
 	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setNeutralPunch(String neutralPunch) {
+		this.neutralPunch = neutralPunch;
 	}
-	public String getLastName() {
-		return lastName;
+	public boolean isPunchType() {
+		return punchType;
 	}
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setPunchType(boolean punchType) {
+		this.punchType = punchType;
 	}
-	public DateTimeFormatter getMyFormatObj() {
-		return myFormatObj;
-	}
-	public void setMyFormatObj(DateTimeFormatter myFormatObj) {
-		this.myFormatObj = myFormatObj;
-	}
-	public String getClockIn() {
-		return clockIn;
-	}
-	public void setClockIn(String clockIn) {
-		this.clockIn = clockIn;
-	}
-	public String getClockOut() {
-		return clockOut;
-	}
-	public void setClockOut(String clockOut) {
-		this.clockOut = clockOut;
-	}
-	public Double getHoursWorked() {
-		return hoursWorked;
-	}
-	public void setHoursWorked(Double hoursWorked) {
-		this.hoursWorked = hoursWorked;
-	}
-	
-	
-	
-	
 }
