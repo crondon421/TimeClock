@@ -106,7 +106,7 @@ public class LoginServlet extends HttpServlet {
 		}
 		finally {
 			
-			try {//attempt to close the result sets
+			try {// attempt to close the result sets
 				conn.close();
 				myRs.close();
 
