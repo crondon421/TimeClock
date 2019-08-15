@@ -1,3 +1,11 @@
+<!--
+Filename: login.jsp
+Author: Christian Rondon
+Date: 8/14/2019
+Description: This file contains the interface of the login container. 
+After entering the username and password and logging, the user will be redirected to
+LoginServlet class to process the POST HTTP request -->
+
 <div class="login-container">
 	<div class="login-topbar">Time Clock Application</div>
 	<div class="login-instructions">Please login to view your Time

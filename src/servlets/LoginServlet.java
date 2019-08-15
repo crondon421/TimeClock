@@ -1,8 +1,8 @@
 /*
- *  File: LoginServlet.java
+ * Filename: LoginServlet.java
  * Date: 8/2/2019
  * Author: Christian Rondon
- * Description: This Java Servlet is used to authenticate the login information entered by the user to access their clock information.
+ * Description: This Java Servlet is used to authenticate the login information entered by the user to access their time sheet information.
  * 
  */
 
@@ -71,27 +71,23 @@ public class LoginServlet extends HttpServlet {
 				employeeList.add(newEmployee);
 			}
 			
-			//iterate through the employeelist to attempt to find a match in username/password
-			for(Employee emp : employeeList) {
-				System.out.println(emp.getLastName());
-				System.out.println(req.getParameter("password"));
-				if (emp.getFirstName().equals(req.getParameter("username"))) {
-					if(emp.getLastName().equals(req.getParameter("password"))) {
+			//iterate through the employee list to attempt to find a match in username/password
+			for(Employee emp : employeeList) { //for each employee in the employee list
+				if (emp.getFirstName().equals(req.getParameter("username"))) {// If username in employee list matches user input
+					if(emp.getLastName().equals(req.getParameter("password"))) {// check to see if passwords match
 						System.out.println("Still working 2");
 						String empType = emp.getEmployeeType();
-						if (empType.equals("hr") || empType.equals("admin")) {
-							System.out.println("SUCCESS");
+						if (empType.equals("hr") || empType.equals("admin")) { //if passwords match and employee is HR or administrator
 							session.setAttribute("user", emp);
 							session.setAttribute("rows", employeeList);
-							session.setAttribute("headURL", "admin_portal.jsp");
+							session.setAttribute("headURL", "admin_portal.jsp"); //headUrl determines what content is shown in the view (middle container of webpage)
 							requestDispatcher = req.getRequestDispatcher("index.jsp");
 							requestDispatcher.forward(req, resp);
 							return;
 						}
-						else {
-							System.out.println("Success");
+						else {	//otherwise, give the employee regular privileges
 							session.setAttribute("user", emp);
-							session.setAttribute("headURL", "employee_portal.jsp");
+							session.setAttribute("headURL", "employee_portal.jsp"); //headUrl determines what is shown in the view (middle of the page)
 							requestDispatcher = req.getRequestDispatcher("index.jsp");
 							requestDispatcher.forward(req, resp);
 							return;
@@ -103,14 +99,14 @@ public class LoginServlet extends HttpServlet {
 			requestDispatcher.forward(req, resp);
 			
 			
-			//TODO: close the result set
+			
 		}catch (Exception e) {
 			System.out.println("EXCEPTION");
 			System.out.println(e);
 		}
 		finally {
 			
-			try {
+			try {//attempt to close the result sets
 				conn.close();
 				myRs.close();
 
