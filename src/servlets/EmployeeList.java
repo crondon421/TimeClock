@@ -2,7 +2,8 @@
  *  File: EmployeeList.java
  * Date: 8/2/2019
  * Author: Christian Rondon
- * Description: This Java Servlet is used to handle the request of a display of a list of employees that are stored in the database.
+ * Description: This Java Servlet is used to populate the display of the employee list. This servlet
+ * is only available to admin and HR type users.
  * 
  */
 

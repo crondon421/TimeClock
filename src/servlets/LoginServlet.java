@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
 	 * */
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		//Instantiation of local variables.
+		//Instantiation of connection, statement, resultset and httpsession variables
 		ArrayList<Employee> employeeList = new ArrayList<Employee>();
 		Connection conn = null;
 		Statement stmt = null;
@@ -59,8 +59,8 @@ public class LoginServlet extends HttpServlet {
 			myRs = stmt.executeQuery("select * from employee");
 
 			/* Boilerplate code used to handle the list of employees retrieved from the database.
-			 * These blocks will be similar to many across the application, and can be prevented by the use
-			 * of an Object Relational Mapping tool such as Hibernate.
+			 * These blocks will be similar to many throughout the application, and can be minimized by the use
+			 * of an Object Relational Mapping tool such as Hibernate ORM.
 			 */
 			while (myRs.next()) {
 				Employee newEmployee = new Employee();

@@ -1,3 +1,10 @@
+<!-- 
+Filename: edit_time_sheet.jsp
+Author:Christian Rondon
+Date: 8/17/2019
+Description: This file serves as the view for the timesheet editor for a chosen employee by the manager or HR 
+			representative. 
+ -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page import="java.util.ArrayList"%>
 

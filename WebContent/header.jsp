@@ -1,3 +1,7 @@
+<!-- Filename: header.jsp
+This file serves as the header of each page. The navigation bar changes depending on the logged
+in users privileges
+ -->
 <html lang="en">
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <link href="css/styles.css" rel="stylesheet" type="text/css">
