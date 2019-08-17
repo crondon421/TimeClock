@@ -1,3 +1,8 @@
+/*
+ * Filename: ManagerServlet.java
+ * Description: This servlets doGet() method processes the display for recorded time shifts for the selected employee.
+ * 				Additionally, the servlets doPost() will store any changes made to the employees time card.
+ * */
 package servlets;
 
 import java.io.IOException;
@@ -25,25 +30,35 @@ import models.DBCredentials;
 @WebServlet("/Manager")
 public class ManagerServlet extends HttpServlet{
 
+	/*
+	 * The doGet() method retrieves the employee id from the HTTP Request attribute,
+	 * then retrieves the employees time sheet information from the database.
+	 * */
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-
-		ArrayList<TimeShift> recordedShifts = new ArrayList<TimeShift>();
+		
+		//Date and Time formatters for both html and sql
 		SimpleDateFormat htmlDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 		SimpleDateFormat sqlFormatter = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-		//establish a connection
-		//TODO: create one connection per login, and store connection inside the session
+		
+		
+		/* Initialization of connection and session objects*/
 		Connection conn = null;
 		CallableStatement stmt = null;
 		ResultSet rs = null;
 		HttpSession session = req.getSession();
 		Integer employeeId = 0;
-
-		try {
+		//ArrayList to store javabeans that represent employees recorded timeshifts
+		ArrayList<TimeShift> recordedShifts = new ArrayList<TimeShift>();
+		
+		try {//Attempt to establish a connection to the mysql database
 			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 			stmt = conn.prepareCall("{call list_timesheet_for_employee(?)}");
 			
+			/*Retrieve the employees timesheet for editing based on their  
+			 * employee ID
+			 * */
 			if(req.getParameter("employee_id")!=null) {
 				employeeId = Integer.parseInt((String)req.getParameter("employee_id"));
 				session.setAttribute("employee_id", Integer.parseInt((String)req.getParameter("employee_id")));
@@ -53,7 +68,7 @@ public class ManagerServlet extends HttpServlet{
 			stmt.setInt(1, employeeId);
 			rs = stmt.executeQuery();
 
-			while (rs.next()) {
+			while (rs.next()) {//loop stores each recorded shift into ArrayList
 				TimeShift ts = new TimeShift();
 				ts.setEmployeeId(rs.getInt("employee_id"));
 				Date sqlInDate = sqlFormatter.parse(rs.getString("punch_in"));
@@ -67,7 +82,7 @@ public class ManagerServlet extends HttpServlet{
 				recordedShifts.add(ts);
 			} 
 
-			//TODO: send the set of beans to the jtsl on the jsp page
+			//Sets the punches into the request attributes for display in the JSP view
 			req.setAttribute("punches", recordedShifts);
 			req.setAttribute("employee_id", employeeId);
 			session.setAttribute("headURL","edit_time_sheet.jsp");
@@ -90,27 +105,36 @@ public class ManagerServlet extends HttpServlet{
 
 	}
 
+	/*
+	 * The doPost() method receives the edited timesheet information sent from edit_time_sheet.jsp 
+	 * and compares it with the timesheet information from the database. If any of the dates and times
+	 * are different, then a sql statement is sent to the database to update the information*/
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ArrayList<TimeShift> recordedShifts = new ArrayList<TimeShift>();
+		
+		
 		SimpleDateFormat htmlDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 		SimpleDateFormat sqlFormatter = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-		//establish a connection
-		//TODO: create one connection per login, and store connection inside the session
+		//initialization of the session and connection objects
 		Connection conn = null;
 		CallableStatement calledStmt = null;
 		PreparedStatement preppedStmt = null;
 		ResultSet rs = null;
 		HttpSession session = req.getSession();
 		Boolean changesMade = false;
+		ArrayList<TimeShift> recordedShifts = new ArrayList<TimeShift>();
 		
-		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", "root", "halloffame421");
+		try {//Attempt to make a connection and call to the database
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 			calledStmt = conn.prepareCall("{call list_timesheet_for_employee(?)}");
 			Integer employeeId = Integer.parseInt((String)req.getParameter("employee_id"));
 			calledStmt.setInt(1, employeeId);
 			rs = calledStmt.executeQuery();
-
+			
+			/*
+			 * Iterates through the result set returned by the database
+			 * and prepares data for comparison to the changes made
+			 * to the data.*/
 			while (rs.next()) {
 				TimeShift ts = new TimeShift();
 				ts.setEmployeeId(rs.getInt("employee_id"));
@@ -126,13 +150,7 @@ public class ManagerServlet extends HttpServlet{
 			}
 			
 			for(TimeShift shift : recordedShifts) {
-				
-				System.out.println("Clock in time and form in models " + shift.getClockIn());
-				System.out.println("Clock out time and form in models " + shift.getClockOut());
-				System.out.println("Clock in time and form in jsp " + req.getParameter(String.valueOf(shift.getPunchInId())));
-				System.out.println("Clock in time and form in jsp " + req.getParameter(String.valueOf(shift.getPunchOutId())));
-				System.out.println();
-				
+				//compare the stored timepunch info to the changes made based on punchID
 				if (!shift.getClockIn().equals(req.getParameter(String.valueOf(shift.getPunchInId())))) {
 					System.out.println("Clock in times different, changing");
 					System.out.println();
@@ -145,7 +163,7 @@ public class ManagerServlet extends HttpServlet{
 					preppedStmt.executeUpdate();
 					changesMade = true;
 				}
-				
+				//compare the stored timepunch info to the changes made based on punchID
 				if (!shift.getClockOut().equals(req.getParameter(String.valueOf(shift.getPunchOutId())))) {
 					System.out.println("Clock out times different, changing");
 					System.out.println();
@@ -160,11 +178,11 @@ public class ManagerServlet extends HttpServlet{
 				}
 			}
 			
-			if(changesMade) {
+			if(changesMade) {//if the changes that were made are successful, direct to the success page
 				session.setAttribute("headURL","edit_timesheet_success.jsp");
 				RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
 				requestDispatcher.forward(req, resp);
-			}else {
+			}else {//if the changes made had an error, direct to the error page
 				session.setAttribute("headURL", "edit_timesheet_error.jsp");
 				RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
 				requestDispatcher.forward(req, resp);

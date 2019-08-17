@@ -1,5 +1,5 @@
 <!-- Filename: admin_portal.jsp
-This file can serve as the employee homepage- the first page the employee sees when 
+This file serves as a placeholder for the administrator home page- the first page the a manager or HR employee sees when 
 successfully logging in.
  -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>

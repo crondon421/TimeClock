@@ -1,3 +1,14 @@
+/*
+ * Filename: PunchCardServlet.java
+ * Author: Christian Rondon
+ * Date: 8/17/19
+ * Description: This servlet is a handler for the requests made from punchcard.jsp. 
+ * 				The doGet() method queries the database for the last punch entered by the employee.
+ * 				If the employee clocked out last, the clock in button will be enabled in the view.
+ * 				If the employee clocked in last, the clock out button will be enabled.
+ * 				The doPost() method punches the punch card accordingly and stores the new punch
+ * 				in the database.
+ * */
 package servlets;
 
 import java.io.IOException;
@@ -25,37 +36,37 @@ import models.DBCredentials;
 @WebServlet("/PunchCard")
 public class PunchCardServlet extends HttpServlet{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
+	/*
+	 * doGet() method retrieves last punch data from the database for the employee that is logged in
+	 * and returns the punchcard.jsp view accordingly.*/
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		//Create connection
-		resp.setContentType("text/html");
+		//instantiation of the connection, prepared statement, resultset and HttpSession.
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		HttpSession session = req.getSession();
 
-
-		Employee user = (Employee)session.getAttribute("user");
-		if(user == null) {
+		Employee user = (Employee)session.getAttribute("user");//Javabean used for the employee that is logged in.
+		
+		if(user == null) { //if user is null, the session has expired and the user has to log in again.
 			session.setAttribute("headURL","login.jsp");
 			RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
 			requestDispatcher.forward(req, resp);
 		}
 
-		try {
+		try {//Attempts to establish a connection, and retreive data necessary to find the employees most recent punch.
+			
+			//establishing a connection to the database.
 			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 			stmt = conn.prepareStatement("select * from clock where PunchTime=(Select MAX(PunchTime)from clock where EmployeeID=?)");
 			stmt.setInt(1, user.getEmployeeId());
 			rs = stmt.executeQuery();
 
-
-			while (rs.next()) {
+			while (rs.next()) {//records the last punch by the employee into a JavaBean.
 				TimePunch punch = new TimePunch();
 				//TODO: Create the bean
 				punch.setEmployeeId(rs.getInt("EmployeeID"));
@@ -69,7 +80,7 @@ public class PunchCardServlet extends HttpServlet{
 		}catch (Exception e) {
 			e.printStackTrace();
 		}finally {
-			try {
+			try {//attempts to close the resultset and connection if the try block was successful.
 				rs.close();
 				conn.close();
 			} catch (SQLException e) {
@@ -81,32 +92,38 @@ public class PunchCardServlet extends HttpServlet{
 
 	}
 
+	/*
+	 * doPost() method analyzes the TimePunch bean to determine whether the employees most recent
+	 * punch was in or out, and punches the timecard accordingly, adding a new punch time
+	 * to the database. 
+	 */ 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		//Create connection
-		resp.setContentType("text/html");
+		//Date and Time formatters
+		SimpleDateFormat sqlFormatter = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+		SimpleDateFormat javaDateFormatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+		Date d1 = null;
+		Date d2 = new Date(); //d2 is the current date and time
+		
+		//Instantiate the connection, mysql prepared statement, resultset and HttpSession
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		HttpSession session = req.getSession();
-		SimpleDateFormat sqlFormatter = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-		SimpleDateFormat javaDateFormatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-		Date d1 = null;
-		Date d2 = new Date();
-		TimePunch lastPunch = new TimePunch();
-
-
+		
+		//Objects that represent user information and most recent time punch
 		Employee user = (Employee)session.getAttribute("user");
-
-		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", "root", "halloffame421");
+		TimePunch lastPunch = new TimePunch();
+		
+		try {//Attempt to establish a connection to the mysql database
+			
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/timeclockdb", DBCredentials.USERNAME, DBCredentials.PASSWORD);
 			stmt = conn.prepareStatement("select * from clock where PunchTime=(Select MAX(PunchTime)from clock where EmployeeID=?)");
 			stmt.setInt(1, user.getEmployeeId());
 			rs = stmt.executeQuery();
 
-			while (rs.next()) {
-				//TODO: Create the bean
+			while (rs.next()) {//store the latest punch into a java object
 				lastPunch.setEmployeeId(rs.getInt("EmployeeID"));
 				lastPunch.setNeutralPunch(rs.getString("PunchTime"));
 				lastPunch.setPunchType(rs.getBoolean("PunchType"));
@@ -116,24 +133,24 @@ public class PunchCardServlet extends HttpServlet{
 			if (d1 != null) {
 				long timeElapsed = d2.getTime() - d1.getTime();
 				long diffMinutes = timeElapsed / (60 * 1000);
-				if (diffMinutes >= 5) {
+				if (diffMinutes >= 5) {//Checks to see that five minutes has elapsed since the most recent punch
 					//do clockout/clockin procedure
 					stmt = conn.prepareStatement("INSERT INTO clock(EmployeeID, PunchTime, PunchType) VALUES(?, ?, ?)");
-					if(lastPunch.isPunchType() == true) {
+					if(lastPunch.isPunchType() == true) {//if the user is clocked in, clock the user out
 						stmt.setInt(1, user.getEmployeeId());
 						Date javaDate = javaDateFormatter.parse(d2.toString());
 						String sqlDateString = sqlFormatter.format(javaDate);
 						stmt.setString(2, sqlDateString);
-						stmt.setBoolean(3, false);
+						stmt.setBoolean(3, false);//set clock type to false(clocked out)
 						stmt.execute();
 						session.setAttribute("headURL", "employee_portal.jsp");
 					}
-					if(lastPunch.isPunchType() == false) {
+					if(lastPunch.isPunchType() == false) {//if the user is clocked out, clock the user in
 						stmt.setInt(1, user.getEmployeeId());
 						Date javaDate = javaDateFormatter.parse(d2.toString());
 						String sqlDateString = sqlFormatter.format(javaDate);
 						stmt.setString(2, sqlDateString);
-						stmt.setBoolean(3, true);
+						stmt.setBoolean(3, true);//set clock type to true(clocked in)
 						stmt.execute();
 						session.setAttribute("headURL", "employee_portal.jsp");
 					}
@@ -143,27 +160,23 @@ public class PunchCardServlet extends HttpServlet{
 					session.setAttribute("headURL", "clock-cooldown.jsp");
 
 				}
-			}else {
+			}else {//if no clock in information is found, clock the employee in for the first time
 				stmt = conn.prepareStatement("INSERT INTO clock(EmployeeID, PunchTime, PunchType) VALUES(?, ?, ?)");
 				stmt.setInt(1, user.getEmployeeId());
 				Date javaDate = javaDateFormatter.parse(d2.toString());
 				String sqlDateString = sqlFormatter.format(javaDate);
 				stmt.setString(2, sqlDateString);
-				stmt.setBoolean(3, true);
+				stmt.setBoolean(3, true);//set clock type to true(clocked in)
 				stmt.execute();
 				session.setAttribute("headURL", "employee_portal.jsp");
 			}
-
-
-
-
 			RequestDispatcher requestDispatcher = req.getRequestDispatcher("index.jsp");
 			requestDispatcher.forward(req, resp);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally {
-			try {
+			try {//attempt to clock the resultset and connection
 				rs.close();
 				conn.close();
 			} catch (SQLException e) {

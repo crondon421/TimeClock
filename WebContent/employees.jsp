@@ -1,3 +1,9 @@
+<!-- 
+Filename: employees.jsp
+Description: This page serves as the interface that displays the list of employees that
+			The admin/hr user can view and edit their time sheets.
+ -->
+
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page import="java.util.ArrayList"%>
 
