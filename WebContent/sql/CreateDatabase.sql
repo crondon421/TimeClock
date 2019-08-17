@@ -1,3 +1,8 @@
+CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON timeclockdb.* to 'username'@'localhost';
+GRANT SELECT ON mysql.proc TO 'username'@'localhost';
+FLUSH privileges
+
 CREATE database if NOT EXISTS timeClockDB;
 
 use timeclockdb;
